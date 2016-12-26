@@ -9,13 +9,24 @@ const Client = {
     user: null,
     connected: true,
 
-    _handler: {
-        any: [],
-    },
+    _handler: null,
+    _subscriptions: null,
+    _pingInterval: null,
 
     init: function(socket) {
         this.id = uuid.v4();
         this.socket = socket;
+        this._handler = {
+            any: [],
+        };
+
+        this._pingInterval = setInterval(() => {
+            let clientIdentifier = this.user && this.user.userName || this.id;
+            console.log(`ping to ${clientIdentifier}`);
+            this.socket.ping();
+        }, 40000);
+
+        this._subscriptions = [];
         this.socket.on('message', this._handleMessage.bind(this));
     },
 
@@ -42,6 +53,16 @@ const Client = {
             }
 
             this.connected = false;
+
+            Promise.all(this._subscriptions).then(list => {
+                list.forEach(subscription => {
+                    subscription.unsubscribe();
+                });
+
+                console.log(`${this.user.userName} unsubscribed from ${list.length} events!`);
+            });
+
+            clearInterval(this._pingInterval);
 
             if (!clientInitiated) {
                 this.socket.close();
@@ -130,6 +151,10 @@ const Client = {
             type: type,
             data: message,
         }, ack);
+    },
+
+    addSubscription(promise) {
+        this._subscriptions.push(promise);
     }
 };
 
