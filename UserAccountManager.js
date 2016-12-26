@@ -34,12 +34,14 @@ ConnectionManager.messageHandler('account.partner', (client, message) => {
 // subscribe to partner status
 AuthManager.authenticated((client) => {
     User.load(client.user.partner).then(partner => {
-        UserEvents.on(`${partner._id}:online`, () => {
+        let s = UserEvents.on(`${partner._id}:online`, () => {
 
             User.load(partner._id).then(partner => {
                 client.push('partnerStatusChanged', { online: partner.online, lastSeen: partner.lastSeen });
             });
 
         });
+
+        client.addSubscription(s);
     }).catch(e => console.error(e));
 })

@@ -31,6 +31,7 @@ ConnectionManager.messageHandler('account.sendTextMessage', (client, message) =>
             actualMessage.type = 'text';
             actualMessage.from = client.user._id.toString();
             actualMessage.date = new Date();
+            delete actualMessage._account;
 
             // everthing looks fine lets store this message
             Db.put('messages', actualMessage);
@@ -61,7 +62,9 @@ ConnectionManager.messageHandler('account.syncMessages', (client, message) => {
 });
 
 AuthManager.authenticated(client => {
-    ConversationEvents.on(`${client.user._id.toString()}:newMessage`, () => {
+    let s = ConversationEvents.on(`${client.user._id.toString()}:newMessage`, () => {
         client.push('newMessage');
-    })
+    });
+
+    client.addSubscription(s);
 })
