@@ -2,7 +2,7 @@
   "name": "heart-wire-server",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "main.js",
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -10,6 +10,7 @@
     "express": "^4.14.0",
     "mongodb": "^2.2.9",
     "mubsub": "^1.2.0",
+    "newrelic": "^1.30.3",
     "node-uuid": "^1.4.7",
     "sha1": "^1.1.1",
     "ws": "^1.1.1"

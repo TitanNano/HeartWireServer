@@ -1,3 +1,5 @@
+require('newrelic');
+
 const http = require('http');
 const WebSocketServer = require("ws").Server;
 const express = require('express');
