@@ -1,7 +1,7 @@
-const UserEvents = require('./UserEvents');
 const ConnectionManager = require('./ConnectionManager');
 const User = require('./User');
 const sha1 = require('sha1');
+const uuid = require('uuid/v4');
 
 let unauthorized = new Map();
 let listeners = {
@@ -23,7 +23,7 @@ ConnectionManager.connected(client => {
 });
 
 ConnectionManager.messageHandler('authentication', (client, message) => {
-    let { username, password } = message.data;
+    let { username, password, clientId } = message.data;
 
     clearTimeout(unauthorized.get(client));
 
@@ -39,6 +39,22 @@ ConnectionManager.messageHandler('authentication', (client, message) => {
     User.load(username).then(user => {
         password = sha1(password);
 
+        if (clientId) {
+            if (user.clients.indexOf(clientId) < 0 && !client.validateId(clientId)) {
+                return client.reply(message.id, {
+                    error: 'invalid client',
+                    reason: 'client id does not belong to this user! security violation!'
+                });
+            }
+
+            client.id = clientId;
+        } else {
+            user.clients.push(uuid());
+            user.set('clients', user.clients);
+
+            client.id = user.clients[user.clients.length - 1];
+        }
+
         console.log('compare', password, 'and', user.password);
 
         if (user.password === password) {
@@ -47,7 +63,7 @@ ConnectionManager.messageHandler('authentication', (client, message) => {
             client.user = user;
             listeners.authenticated.forEach(fn => fn(client));
 
-            client.reply(message.id, user.export());
+            client.reply(message.id, user.export(client));
         } else {
             client.reply(message.id, {
                 error: 'authFailure',

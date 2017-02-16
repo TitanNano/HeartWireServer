@@ -16,6 +16,8 @@ const User = {
     lastSeen: '',
     color: 'green',
     syncChallenge: null,
+    clients: null,
+    push: null,
 
     /**
      * [load description]
@@ -24,7 +26,7 @@ const User = {
      *
      * @param  {string} username [description]
      *
-     * @return {Promise}          [description]
+     * @return {Promise<User>}          [description]
      */
     load: function(username) {
         let id = null;
@@ -37,8 +39,10 @@ const User = {
 
         return Db.get('users', { $or: [{ userName: username }, { _id: id }] })
             .then(this.create.bind(this))
-            .catch(() => {
-                console.error('no client with this id or username found!');
+            .catch((reason) => {
+                console.error('no client with this id or username found!', username, reason);
+
+                return Promise.reject();
             });
     },
 
@@ -54,16 +58,19 @@ const User = {
     create: function(userData) {
         let instance = Object.create(this);
 
+        instance.push = {};
+        instance.clients = [];
+
         return Object.assign(instance, userData);
     },
 
     /**
-     * [set description]
+     * applies a value to the given property name and persists the user object.
      *
-     * @param {string} key   [description]
-     * @param {*} value [description]
+     * @param {string} key   the property name
+     * @param {*} value any value to apply
      *
-     * @return {Promise} [description]
+     * @return {Promise} returns a promise for when the object has been saved.
      */
     set: function(key, value) {
         let update = { _id: this._id };
@@ -81,7 +88,14 @@ const User = {
         });
     },
 
-    export: function() {
+    /**
+     * returns a save data object to send to the client
+     *
+     * @param  {Client} [client] the client who is requesting the export
+     *
+     * @return {Object} the data object
+     */
+    export: function(client) {
         let clone = {
             _id: this._id,
             userName: this.userName,
@@ -91,6 +105,8 @@ const User = {
             name: this.name,
             lastSeen: this.lastSeen,
             syncChallenge: !!this.syncChallenge,
+            push: client ? (client.id in this.push) : undefined,
+            clientId: client ? client.id : undefined,
         };
 
         return clone;

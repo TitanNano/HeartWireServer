@@ -29,6 +29,12 @@ const GlobalEvents = {
         });
     },
 
+    all(listener) {
+        return this._channel.then(channel => {
+            return channel.subscribe(listener);
+        });
+    },
+
     emit: function(type, message) {
         this._channel.then(channel => {
             return channel.publish(type, message);

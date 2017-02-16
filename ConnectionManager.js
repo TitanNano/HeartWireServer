@@ -42,7 +42,7 @@ const ConnectionManager = {
     _clients: {},
 
     _handleConnection: function(client) {
-        this._connectedHandler.filter(handler => (handler.fn(client), !handler.once));
+        this._connectedHandler = this._connectedHandler.filter(handler => (handler.fn(client), !handler.once));
     },
 
     _handleDisconnect: function(client) {
@@ -126,6 +126,19 @@ const ConnectionManager = {
         }
     },
 
+    /**
+     * @callback ClientConnectedCallback
+     * @param {Client} client
+     *
+     * @return {void}
+     */
+    /**
+     * Registers an eventhandler which will be executed once a client has been connected.
+     *
+     * @param  {ClientConnectedCallback} fn           [description]
+     * @param  {Boolean}  [once=false] [description]
+     * @return {void}                [description]
+     */
     connected: function(fn, once = false) {
         this._connectedHandler.push({ fn: fn, once: once });
     },

@@ -9,6 +9,7 @@ require('./AuthManager');
 require('./SyncManager');
 require('./UserAccountManager');
 require('./MessagesManager');
+require('./PushManager');
 
 const port = process.env.PORT || 5000;
 const staticServer = express();
