@@ -1,6 +1,8 @@
 const MongoClient = require('mongodb').MongoClient;
 const Config = require('./Config');
 
+const LAST_X_ITEMS = Symbol('LAST_X_ITEMS');
+
 const dbHost = Config.db_domain;
 
 let connectDb = function() {
@@ -54,12 +56,22 @@ let Db = {
             delete doc._id;
 
             return db.collection(collection).updateOne(query, { $set: doc }, { upsert: true });
-        })
+        });
     },
 
-    get: function(collection, query, {allowEmpty = false, limit = 0 } = {}) {
+    get: function(collection, query, {allowEmpty = false, limit = 0, skip = 0 } = {}) {
         return ensureConnection().then(db => {
-            return db.collection(collection).find(query).limit(limit).toArray();
+
+            if (skip.isSkipRange) {
+                if (skip.type === LAST_X_ITEMS) {
+                    skip = db.collection(collection).count() - skip.count;
+                } else {
+                    console.error('Invalid skip range in db query!');
+                    return Promise.reject();
+                }
+            }
+
+            return db.collection(collection).find(query).limit(limit).skip(skip).toArray();
         }).then(list => {
             if (list.length < 2) {
                 if (list[0]) {
@@ -86,6 +98,10 @@ let Db = {
             }
         })
     },
+
+    getLastDocuments(count) {
+        return { isSkipRange: true, type: LAST_X_ITEMS, count: count };
+    }
 
 };
 
