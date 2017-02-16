@@ -34,10 +34,14 @@ ConnectionManager.messageHandler('account.sendTextMessage', (client, message) =>
             delete actualMessage._account;
 
             // everthing looks fine lets store this message
-            Db.put('messages', actualMessage);
-            ConversationEvents.emit(`${actualMessage.to}:newMessage`);
-            client.reply(message.id, { status: true });
+            return Db.put('messages', actualMessage);
         }
+
+        return Promise.reject('user sent a messae to someone other than his partner!');
+    }).then(() => {
+        // message is in the db we can tell other users about it!
+        ConversationEvents.emit(`${actualMessage.to}:newMessage`, actualMessage);
+        client.reply(message.id, { status: true });
     });
 });
 
@@ -46,17 +50,26 @@ ConnectionManager.messageHandler('account.syncMessages', (client, message) => {
         return false;
     }
 
-    let lastMessage = message.data;
-
     console.log(client.user.userName, 'wants to sync messages', message.data);
 
-    Db.getList('messages', {
+    const lastMessage = message.data;
+    const query = {
         $or: [
             {from: client.user._id.toString()},
             {to: client.user._id.toString()}
         ],
         _id: { $gt: new ObjectId(lastMessage) },
-    }, { allowEmpty: true, limit: 50 }).then(messages => {
+    };
+
+    let request = null;
+
+    if (lastMessage !== 0) {
+        request = Db.getList('messages', query, { allowEmpty: true, limit: 50 });
+    } else {
+        request = Db.getList('messages', query, { allowEmpty: true, skip: Db.getLastDocuments(50) });
+    }
+
+    request.then(messages => {
         client.reply(message.id, messages);
     });
 });
