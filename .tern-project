@@ -1,27 +1,21 @@
 {
   "ecmaVersion": 6,
   "libs": [],
-  "loadEagerly": [
-    "./**"
-  ],
   "plugins": {
     "complete_strings": {
       "maxLength": 15
     },
-    "modules": {
-      "dontLoad": "",
-      "load": "",
-      "modules": ""
-    },
-    "es_modules": {},
     "doc_comment": {
       "fullDocs": true,
-      "strong": false
+      "strong": true
     },
     "node": {
-      "dontLoad": "",
+      "dontLoad": false,
       "load": "",
       "modules": ""
-    }
+    },
+    "node_resolve": {},
+    "node-extension": {},
+    "guess-types": {}
   }
 }

@@ -7,7 +7,6 @@
         "no-unused-vars" : 2,
         "no-undef" : 2,
         "valid-typeof" : 2,
-        "valid-jsdoc" : 2,
         "no-unreachable" : 2,
         "dot-notation" : 2,
         "no-redeclare" : 2,
