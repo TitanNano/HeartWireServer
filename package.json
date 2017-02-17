@@ -6,14 +6,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "node-baidu-push": "^0.1.3",
     "express": "^4.14.0",
     "mongodb": "^2.2.9",
     "mubsub": "^1.2.0",
     "newrelic": "^1.30.3",
-    "uuid": "^3.0.1",
+    "node-baidu-push": "git+https://github.com/TitanNano/node-baidu-push.git",
     "sha1": "^1.1.1",
-    "ws": "^2.0.3"
+    "uuid": "^3.0.1",
+    "ws": "^1.1.1"
   },
   "engines": {
     "node": "6.4.0"
