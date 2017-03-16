@@ -24,17 +24,17 @@ server.listen(port);
 const webSocket = new WebSocketServer({
     server: server,
     path: '/socket',
-    handleProtocols: function(protocols, cb) {
+    handleProtocols: function(protocols) {
         for (let i = supportedProtocolls.length-1; i >= 0; i--) {
             let protocol = supportedProtocolls[i];
 
             if (protocols.indexOf(protocol) >= 0) {
-                return cb(true, protocol);
+                return protocol;
             }
         }
 
         console.log('Client tried to connect over a deprecated or invalid protocol!');
-        return cb(false);
+        return false;
     }
 });
 
