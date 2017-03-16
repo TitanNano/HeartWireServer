@@ -27,9 +27,24 @@ const sendPush = {
 
         console.log(LOG_PREFIX, 'sending baidu push ', pushMessage);
 
-        (new Promise(done => {
-            baiduPushClient.pushMsgToSingleDevice(token, pushMessage, { msg_type: 1 }, done);
-        })).then(result => console.log(LOG_PREFIX, 'baidu push done:', result));
+        (new Promise((success, failure) => {
+            baiduPushClient.pushMsgToSingleDevice(token, pushMessage, { msg_type: 1 },
+                (error, response) => {
+                    if (error) {
+                        failure(error);
+                    } else {
+                        success(response.response_params);
+                    }
+                });
+        })).then((result) => {
+                console.log(LOG_PREFIX, 'baidu push done:', result);
+
+                setTimeout(() => {
+                    baiduPushClient.queryMsgStatus(result.msg_id, (error, result) =>
+                        console.log(error, result));
+                }, 5000);
+        }).catch((error) =>
+            console.error(LOG_PREFIX, 'baidu push failed:', error));
     },
 
     simple(){}
